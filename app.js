@@ -16,6 +16,15 @@ var Income = function(id, description, value) {
 
 };
 
+var calcuateTotal = function(type) {
+    var sum = 0;
+    data.allItems[type].forEach(function(cur) {
+      sum += cur.value;
+    });
+    data.totals[type] = sum;
+    
+};
+
 //Object that stores the the totals as well as the expenses and incomes
  var data = {
    allItems: {
@@ -25,7 +34,9 @@ var Income = function(id, description, value) {
    totals: {
     exp: 0,
     inc: 0
-  }
+  },
+  budget: 0,
+  percentage: -1
 };
 
 //adds new item to budget controller
@@ -57,6 +68,18 @@ return {
 
         //return new element
         return newItem;
+        },
+
+        calculateBudget: function() {
+          //calculate total income and expenses
+          calcuateTotal('exp');
+          calcuateTotal('inc');
+
+          //income minus expenses from data object
+          data.budget = data.totals.inc - data.totals.exp;
+          
+          //calcuate the percentage of income that we spent: expenses / income
+          data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
         },
 
         testing: function() {
@@ -92,7 +115,7 @@ var DOMstrings = {
         return {
         type: document.querySelector(DOMstrings.inputType).value,  //either income or expenses
         description: document.querySelector(DOMstrings.inputDescription).value,
-        value: document.querySelector(DOMstrings.inputValue).value
+        value: parseFloat(document.querySelector(DOMstrings.inputValue).value)
       };
 
     },
@@ -165,21 +188,22 @@ var controller = (function(budgetCtrl, UICtrl) {
     };
 
     var updateBudget = function() {
-      //Calculate the budget
 
-
-      //Return the budget
-
-
-      //Display the budget on the UI
+      //calculate budget
+      budgetCtrl.calculateBudget();
+      
+      //Return Budget
+      
     };
 
 
   var ctrlAddItem = function () {
     var input, newItem;
-    //1.Get filed Input Data
+    //1.Get field Input Data
     input = UICtrl.getinput();
 
+    //Validate blank inputs in both fields and input has to be greater than 0
+    if(input.description !== "" && !isNaN(input.value) && input.value > 0) {
 
     //2.Add an item to the budget CONTROLLER
      newItem = budgetCtrl.addItem(input.type, input.description, input.value);
@@ -191,7 +215,9 @@ var controller = (function(budgetCtrl, UICtrl) {
     UICtrl.clearField();
 
     //Calculate and Updates the Budget
-    updateBudget.
+    updateBudget
+
+    }
 
   };
 
