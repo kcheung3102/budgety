@@ -79,9 +79,22 @@ var budgetController = (function() {
             data.budget = data.totals.inc - data.totals.exp;
             
             //calcuate the percentage of income that we spent: expenses / income
-            data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+            if(data.totals.inc > 0) {
+              data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+            } else {
+              data.percentage = -1; //non-existent 
+            }
           },
-  
+          
+          getBudget: function() {
+            return {
+              budget: data.budget,
+              totalInc: data.totals.inc,
+              totalExp: data.totals.exp,
+              percentage: data.percentage
+            }
+          },
+
           testing: function() {
             console.log(data);
           }
@@ -105,7 +118,11 @@ var budgetController = (function() {
     inputDescription: '.add__description',
     inputValue: '.add__value',
     incomeContainer: '.income__list',
-    expensesContainer:'.expenses__list'
+    expensesContainer:'.expenses__list',
+    budgetLabel:'.budget__value',
+    incomeLabel:'.budget__income--value',
+    expensesLabel: '.budget__expenses--value',
+    percentageLabel: '.budget__expenses--percentage'
   
   }
   
@@ -125,10 +142,10 @@ var budgetController = (function() {
           //Create HTML string with placeholder text
            if(type === 'inc') {
              element = DOMstrings.incomeContainer;
-              html = '<div class="item clearfix" id="income-%id%"> <div class="item__description">%description%</div> <div class="right clearfix"><div class="item__value">-%value%</div> <div class="item__delete"> <button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div</div></div>';
+              html = '<div class="item clearfix" id="income-%id%"> <div class="item__description">%description%</div> <div class="right clearfix"><div class="item__value">+$%value%</div> <div class="item__delete"> <button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div</div></div>';
            } else if(type === 'exp') {
              element = DOMstrings.expensesContainer;
-              html = '<div class="item clearfix" id="expense-%id%"> <div class="item__description">%description%</div> <div class="right clearfix"><div class="item__value">-%value%</div> <div class="item__delete"> <button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div</div></div>';
+              html = '<div class="item clearfix" id="expense-%id%"> <div class="item__description">%description%</div> <div class="right clearfix"><div class="item__value">-$%value%</div> <div class="item__delete"> <button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div</div></div>';
            }
           //Replace the placeholder text with actual data
           newHtml = html.replace('%id%', obj.id);
@@ -156,7 +173,15 @@ var budgetController = (function() {
         //Input goes back to the description field after its cleared
         fieldsArr[0].focus();
       },
-  
+      
+      displayBudget: function(obj) {
+
+        document.querySelector(DOMstrings.budgetLabel).textContent = obj.budget;
+        document.querySelector(DOMstrings.incomeLabel).textContent = obj.totalInc;
+        document.querySelector(DOMstrings.expensesLabel).textContent = obj.totalExp;
+        document.querySelector(DOMstrings.percentageLabel).textContent = obj.percentage;
+      },
+
       getDOMstrings: function() {
         return DOMstrings;
       }
@@ -193,6 +218,10 @@ var budgetController = (function() {
         budgetCtrl.calculateBudget();
         
         //Return Budget
+        var budget = budgetCtrl.getBudget();
+
+        //Display the budget on the UI
+        UICtrl.displayBudget(budget);
         
       };
   
